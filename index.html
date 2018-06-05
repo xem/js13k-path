@@ -1,9 +1,9 @@
-<canvas id=a>
+﻿<canvas id=a>
 <script>
-c = a.getContext("2d");
+c=a.getContext("2d");
 c.beginPath();
-c.moveTo(x=50.5,y=50.5);
-for(i of"&RB")j=i.charCodeAt(),a=j&7,e='012221000',c.lineTo(x+=a*(e[d=1+(j>>4)]-1),y+=a*(e[8-d]-1))
+c.moveTo(x=50.5,y=x)
+for(i of"&RB")j=i.charCodeAt(),a=j&7,e='10001222',c.lineTo(x+=a*e[d=j>>4]-a,y+=a*e[d+2&7]-a)
 c.closePath();
 c.stroke();
 </script>
