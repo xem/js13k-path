@@ -3,7 +3,7 @@
 c = a.getContext("2d");
 c.beginPath();
 c.moveTo(x=50.5,y=50.5);
-for(i of"&RB")j=i.charCodeAt(),a=j&7,e=[-1,0,1,1,1,0,-1,-1,-1],c.lineTo(x+=a*e[d=1+(j>>4)],y+=a*e[8-d]);
+for(i of"&RB")j=i.charCodeAt(),a=j&7,e='012221000',c.lineTo(x+=a*(e[d=1+(j>>4)]-1),y+=a*(e[8-d]-1))
 c.closePath();
 c.stroke();
 </script>
