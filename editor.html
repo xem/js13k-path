@@ -1,0 +1,129 @@
+﻿<canvas id=a width=600 height=400></canvas>
+<br>
+<input id=o size=99>
+<style>
+* { margin: 0 }
+</style>
+<script>
+o.value = "";
+c = a.getContext("2d");
+
+started = 0;
+x = 0;
+y = 0;
+points = [];
+
+onclick = function(e){
+  newx = e.pageX;
+  newy = e.pageY;
+  if(!started){
+    started = 1;
+    x = newx;
+    y = newy;
+    points.push([x,y]);
+    o.value += "path=[" + x + "," + y + ",'";
+  }
+  else {
+    closestPoint();
+    points.push([newx, newy]);
+    x = newx;
+    y = newy;
+    o.value += String.fromCharCode((angle << 3) + distance);
+  }
+}
+
+onmousemove = function(e){
+  a.width ^= 0;
+  
+  if(points[0]){
+    c.beginPath();
+    c.moveTo(points[0][0], points[0][1]);
+    for(i of points)
+      c.lineTo(i[0] + .5, i[1] + .5);
+    c.stroke();
+  }
+  
+  newx = e.pageX;
+  newy = e.pageY;
+  closestPoint();
+  
+  if(started){
+    c.beginPath();
+    c.moveTo(x, y);
+    c.lineTo(newx + .5, newy + .5);
+    c.stroke();
+    c.closePath();
+  }
+}
+
+closestPoint = function(){
+  dx = newx - x;
+  dy = newy - y;
+  angle = 0;
+  distance = 0;
+  
+  // Up
+  if(dy < 0 && dx > dy / 2 && dx < -dy / 2 ){
+    angle = 0;
+    distance = Math.min(-dy, 16);
+    newx = x;
+    newy = y - distance;
+  }
+  
+  // Down
+  else if(dy > 0 && dx > -dy / 2 && dx < dy / 2 ){
+    angle = 4;
+    distance = Math.min(dy, 16);
+    newx = x;
+    newy = y + distance;
+  }
+  
+  // Left
+  else if(dx < 0 && dy > dx / 2 && dy < -dx / 2 ){
+    angle = 6;
+    distance = Math.min(-dx, 16);
+    newy = y;
+    newx = x - distance;
+  }
+  
+  // Right
+  else if(dx > 0 && dy > -dx / 2 && dy < dx / 2 ){
+    angle = 2;
+    distance = Math.min(dx, 16);
+    newy = y;
+    newx = x + distance;
+  }
+  
+  // Up right
+  else if(dx > 0 && dy < 0){
+    angle = 1;
+    distance = Math.min(Math.max(dx, -dy), 16);
+    newx = x + distance;
+    newy = y - distance;
+  }
+  
+  // Bottom right
+  else if(dx > 0 && dy > 0){
+    angle = 3;
+    distance = Math.min(Math.max(dx, dy), 16);
+    newx = x + distance;
+    newy = y + distance;
+  }
+  
+  // Bottom left
+  else if(dx < 0 && dy > 0){
+    angle = 5;
+    distance = Math.min(Math.max(-dx, dy), 16);
+    newx = x - distance;
+    newy = y + distance;
+  }
+  
+  // Up left
+  else if(dx < 0 && dy < 0){
+    angle = 7;
+    distance = Math.min(Math.max(-dx, -dy), 16);
+    newx = x - distance;
+    newy = y - distance;
+  }
+}
+</script>
