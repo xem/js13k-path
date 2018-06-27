@@ -1,9 +1,9 @@
-﻿<canvas id=a width=900 height=450></canvas>
+﻿<canvas id=a width=2048 height=1024></canvas>
 <br>
 <input id=o size=99>
 <style>
 * { margin: 0 }
-canvas { background: #def; }
+canvas { background: #def; xbackground: url(map.png) no-repeat; background-size: 2000px auto }
 </style>
 <script>
 o.value = "";
@@ -15,8 +15,8 @@ y = 0;
 points = [];
 
 a.onclick = function(e){
-  newx = e.pageX;
-  newy = e.pageY;
+  newx = e.pageX & 0b11111111111000;
+  newy = e.pageY & 0b11111111111100;
   if(!started){
     started = 1;
     x = newx;
@@ -26,9 +26,9 @@ a.onclick = function(e){
     points.push([x,y]);
     //console.log(x, y);
     
-    // 7 last bits of x + 7 last bits of y + (first 4 bits of x + first 3 bits of y)
+
     
-    t = (x & 0x7F) + 1;
+    /*t = (x & 0x7F) + 1;
     u = (y & 0x7F) + 1;
     v = ((x >> 7) << 3) + ((y >> 7) & 7) + 1;
     console.log(
@@ -42,12 +42,11 @@ a.onclick = function(e){
       t.toString(2),
       u.toString(2),
       v.toString(2),
-    );
+    );*/
     o.value += (
-      String.fromCharCode(t) +
-      String.fromCharCode(u) + 
-      String.fromCharCode(v)
-    ).replace(/\0/g,"\\0");
+      String.fromCharCode(x/8) +
+      String.fromCharCode(y/4)
+    ).replace(/\\/g,"\\").replace(/`/g,"\`");
   }
   else {
     closestPoint();
@@ -89,7 +88,7 @@ a.onmousemove = function(e){
     c.closePath();
   }
   else {
-    c.fillRect(e.pageX, e.pageY, 4, 4);
+    c.fillRect(e.pageX & 0b11111111111000, e.pageY & 0b11111111111100, 4, 4);
   }
 }
 
