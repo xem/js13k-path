@@ -1,8 +1,9 @@
-﻿<canvas id=a width=600 height=400></canvas>
+﻿<canvas id=a width=2000 height=1000></canvas>
 <br>
 <input id=o size=99>
 <style>
 * { margin: 0 }
+canvas { background: #def; xbackground: url(map.png) no-repeat; background-size: 2000px auto }
 </style>
 <script>
 o.value = "";
@@ -13,31 +14,63 @@ x = 0;
 y = 0;
 points = [];
 
-onclick = function(e){
+a.onclick = function(e){
   newx = e.pageX;
   newy = e.pageY;
   if(!started){
     started = 1;
     x = newx;
+    //x = (Math.round(x / 7)) * 7;
     y = newy;
+    //y = (Math.round(y / 4)) * 4;
     points.push([x,y]);
-    o.value += "path=[" + x + "," + y + ",'";
+    //console.log(x, y);
+    
+    // 7 last bits of x + 7 last bits of y + (first 4 bits of x + first 3 bits of y)
+    
+    t = (x & 0x7F) + 1;
+    u = (y & 0x7F) + 1;
+    v = ((x >> 7) << 3) + ((y >> 7) & 7) + 1;
+    console.log(
+      x,
+      y,
+      t,
+      u,
+      v,
+      x.toString(2),
+      y.toString(2),
+      t.toString(2),
+      u.toString(2),
+      v.toString(2),
+    );
+    o.value += (
+      String.fromCharCode(t) +
+      String.fromCharCode(u) + 
+      String.fromCharCode(v)
+    ).replace(/\0/g,"\\0");
   }
   else {
     closestPoint();
-    points.push([newx, newy]);
-    x = newx;
-    y = newy;
-    o.value += String.fromCharCode((angle << 3) + distance);
+    if(distance > 0){
+    
+      //console.log(distance/2);
+    
+      points.push([newx, newy]);
+      x = newx;
+      y = newy;
+      // 4 bits for angle, 3 bits for distance
+      o.value += String.fromCharCode((angle << 3) + ((distance - 4) / 4));
+    }
   }
 }
 
-onmousemove = function(e){
+a.onmousemove = function(e){
   a.width ^= 0;
   
   if(points[0]){
     c.beginPath();
-    c.moveTo(points[0][0], points[0][1]);
+    c.lineWidth = 1;
+    c.moveTo(points[0][0] + .5, points[0][1] + .5);
     for(i of points)
       c.lineTo(i[0] + .5, i[1] + .5);
     c.stroke();
@@ -49,10 +82,14 @@ onmousemove = function(e){
   
   if(started){
     c.beginPath();
-    c.moveTo(x, y);
+    c.lineWidth = 1;
+    c.moveTo(x + .5, y + .5);
     c.lineTo(newx + .5, newy + .5);
     c.stroke();
     c.closePath();
+  }
+  else {
+    c.fillRect(e.pageX, e.pageY, 4, 4);
   }
 }
 
@@ -61,69 +98,11 @@ closestPoint = function(){
   dy = newy - y;
   angle = 0;
   distance = 0;
-  
-  // Up
-  if(dy < 0 && dx > dy / 2 && dx < -dy / 2 ){
-    angle = 0;
-    distance = Math.min(-dy, 16);
-    newx = x;
-    newy = y - distance;
-  }
-  
-  // Down
-  else if(dy > 0 && dx > -dy / 2 && dx < dy / 2 ){
-    angle = 4;
-    distance = Math.min(dy, 16);
-    newx = x;
-    newy = y + distance;
-  }
-  
-  // Left
-  else if(dx < 0 && dy > dx / 2 && dy < -dx / 2 ){
-    angle = 6;
-    distance = Math.min(-dx, 16);
-    newy = y;
-    newx = x - distance;
-  }
-  
-  // Right
-  else if(dx > 0 && dy > -dx / 2 && dy < dx / 2 ){
-    angle = 2;
-    distance = Math.min(dx, 16);
-    newy = y;
-    newx = x + distance;
-  }
-  
-  // Up right
-  else if(dx > 0 && dy < 0){
-    angle = 1;
-    distance = Math.min(Math.max(dx, -dy), 16);
-    newx = x + distance;
-    newy = y - distance;
-  }
-  
-  // Bottom right
-  else if(dx > 0 && dy > 0){
-    angle = 3;
-    distance = Math.min(Math.max(dx, dy), 16);
-    newx = x + distance;
-    newy = y + distance;
-  }
-  
-  // Bottom left
-  else if(dx < 0 && dy > 0){
-    angle = 5;
-    distance = Math.min(Math.max(-dx, dy), 16);
-    newx = x - distance;
-    newy = y + distance;
-  }
-  
-  // Up left
-  else if(dx < 0 && dy < 0){
-    angle = 7;
-    distance = Math.min(Math.max(-dx, -dy), 16);
-    newx = x - distance;
-    newy = y - distance;
-  }
+  angle = ((Math.round((Math.atan2(dx, dy))/(2*Math.PI)*16))%16)+8;
+  distance = Math.min(32, Math.round(Math.hypot(dx,dy)/4) * 4);
+  angle_rad = -angle * .39 + 4.72;
+  newx = x + distance * Math.cos(angle_rad);
+  newy = y + distance * Math.sin(angle_rad);
+  //console.log(angle, distance, angle_rad);
 }
 </script>
